@@ -1,0 +1,32 @@
+{
+  "name": "ex3",
+  "version": "1.0.0",
+  "description": "Exercise 3 - REST API for HEX to RGB conversion",
+  "main": "src/server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha",
+    "dev": "set NODE_ENV=dev&& node ./src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/ex3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://github.com/yourusername/ex3#readme",
+  "devDependencies": {
+    "chai": "^5.2.0",
+    "mocha": "^11.0.0",
+    "supertest": "^7.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/ex3/issues"
+  }
+}
