@@ -139,3 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 .pdf
+.doc
+.docx
+ex4
+ex5
