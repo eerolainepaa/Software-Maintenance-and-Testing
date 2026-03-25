@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hex ↔ RGB Color Converter</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .container {
+        background: white;
+        padding: 2rem 2.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 520px;
+        width: 100%;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1.5rem;
+      }
+      .section {
+        margin: 1.8rem 0;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.6rem;
+        font-weight: bold;
+        color: #444;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+      }
+      .rgb-inputs {
+        display: flex;
+        gap: 12px;
+      }
+      .rgb-inputs input {
+        width: 100%;
+        text-align: center;
+      }
+      .button-group {
+        margin-top: 0.8rem;
+        text-align: center;
+      }
+      button {
+        padding: 10px 24px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        background: #007bff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      button:active {
+        background: #004085;
+      }
+      .preview {
+        height: 140px;
+        margin: 1.5rem 0;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #fff;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+        transition:
+          background 0.4s ease,
+          color 0.4s ease;
+        font-size: 1.1rem;
+      }
+      .result {
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 1.05rem;
+        min-height: 1.4em;
+      }
+      .error {
+        color: #d32f2f;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        min-height: 1.2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Hex ↔ RGB Converter</h1>
+
+      <!-- Hex to RGB -->
+      <div class="section">
+        <label for="hexInput">Hex Color (e.g. #FFAABB, FFAABB, #F00)</label>
+        <input type="text" id="hexInput" placeholder="#FFAABB" maxlength="7" />
+        <div class="button-group">
+          <button id="convertHexBtn">Convert Hex → RGB</button>
+        </div>
+        <div id="hexError" class="error"></div>
+        <div class="result" id="rgbResult">RGB: —</div>
+      </div>
+
+      <!-- RGB to Hex -->
+      <div class="section">
+        <label>RGB Values (0–255)</label>
+        <div class="rgb-inputs">
+          <input type="number" id="r" min="0" max="255" placeholder="R" />
+          <input type="number" id="g" min="0" max="255" placeholder="G" />
+          <input type="number" id="b" min="0" max="255" placeholder="B" />
+        </div>
+        <div class="button-group">
+          <button id="convertRgbBtn">Convert RGB → Hex</button>
+        </div>
+        <div id="rgbError" class="error"></div>
+        <div class="result" id="hexResult">Hex: —</div>
+      </div>
+
+      <div class="preview" id="colorPreview">Color Preview</div>
+    </div>
+
+    <script>
+      const hexInput = document.getElementById("hexInput");
+      const convertHexBtn = document.getElementById("convertHexBtn");
+      const rgbResult = document.getElementById("rgbResult");
+      const hexError = document.getElementById("hexError");
+
+      const rInput = document.getElementById("r");
+      const gInput = document.getElementById("g");
+      const bInput = document.getElementById("b");
+      const convertRgbBtn = document.getElementById("convertRgbBtn");
+      const hexResult = document.getElementById("hexResult");
+      const rgbError = document.getElementById("rgbError");
+
+      const preview = document.getElementById("colorPreview");
+
+      // Update preview
+      function updatePreview(color) {
+        if (color) {
+          preview.style.background = color;
+          preview.style.color = getContrastColor(color);
+          preview.textContent = `Preview: ${color}`;
+        } else {
+          preview.style.background = "#ffffff";
+          preview.style.color = "#333";
+          preview.textContent = "Color Preview";
+        }
+      }
+
+      // Simple contrast calculation for text readability
+      function getContrastColor(colorStr) {
+        let r, g, b;
+        if (colorStr.startsWith("#")) {
+          const hex = colorStr.replace("#", "");
+          r = parseInt(hex.substr(0, 2), 16) || 0;
+          g = parseInt(hex.substr(2, 2), 16) || 0;
+          b = parseInt(hex.substr(4, 2), 16) || 0;
+        } else if (colorStr.includes("rgb")) {
+          const nums = colorStr.match(/\d+/g);
+          [r, g, b] = nums ? nums.map(Number) : [255, 255, 255];
+        } else {
+          return "#000000";
+        }
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 130 ? "#000000" : "#ffffff";
+      }
+
+      // HEX → RGB
+      async function convertHexToRgb() {
+        hexError.textContent = "";
+        rgbResult.textContent = "RGB: …";
+
+        const hex = hexInput.value.trim();
+        if (!hex) {
+          rgbResult.textContent = "RGB: —";
+          hexError.textContent = "Please enter a hex value";
+          updatePreview(null);
+          return;
+        }
+
+        try {
+          const response = await fetch(`http://localhost:3000/hex-to-rgb?hex=${encodeURIComponent(hex)}`);
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || "Server error");
+          }
+          const rgb = await response.json();
+          rgbResult.textContent = `RGB: ${rgb.r}, ${rgb.g}, ${rgb.b}`;
+          updatePreview(`rgb(${rgb.r},${rgb.g},${rgb.b})`);
+        } catch (err) {
+          hexError.textContent = err.message;
+          rgbResult.textContent = "RGB: —";
+          updatePreview(null);
+        }
+      }
+
+      // RGB → HEX
+      async function convertRgbToHex() {
+        rgbError.textContent = "";
+        hexResult.textContent = "Hex: …";
+
+        const r = Number(rInput.value);
+        const g = Number(gInput.value);
+        const b = Number(bInput.value);
+
+        if (isNaN(r) || isNaN(g) || isNaN(b)) {
+          hexResult.textContent = "Hex: —";
+          rgbError.textContent = "Please enter valid numbers (0–255)";
+          updatePreview(null);
+          return;
+        }
+
+        try {
+          const response = await fetch("http://localhost:3000/rgb-to-hex", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ r, g, b }),
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || "Server error");
+          }
+
+          const data = await response.json();
+          hexResult.textContent = `Hex: ${data.hex}`;
+          updatePreview(data.hex);
+        } catch (err) {
+          rgbError.textContent = err.message;
+          hexResult.textContent = "Hex: —";
+          updatePreview(null);
+        }
+      }
+
+      // Button click handlers
+      convertHexBtn.addEventListener("click", convertHexToRgb);
+      convertRgbBtn.addEventListener("click", convertRgbToHex);
+
+      // Optional: Allow pressing Enter in hex input to trigger conversion
+      hexInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          convertHexToRgb();
+        }
+      });
+
+      // Optional: initial example
+      hexInput.value = "#FFAABB";
+      // You can leave it without auto-converting on load, or call once:
+      // convertHexToRgb();
+    </script>
+  </body>
+</html>
