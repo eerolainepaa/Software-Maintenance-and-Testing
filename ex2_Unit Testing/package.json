@@ -1,0 +1,15 @@
+{
+  "name": "ex2",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Simple arithmetic module with unit tests",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "chai": "^5.1.2",
+    "mocha": "^10.8.2"
+  }
+}
